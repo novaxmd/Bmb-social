@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Download {
+  id         String   @id @default(cuid())
+  url        String
+  platform   String   // youtube | instagram | tiktok | twitter
+  type       String   // video | audio
+  quality    String   @default("best")
+  status     String   @default("pending") // pending | downloading | sending | done | error | cancelled
+  progress   Float    @default(0)
+  fileSize   BigInt?
+  fileName   String?
+  filePath   String?
+  errorMsg   String?
+  chatId     String?   // Telegram chat id (optional for web downloads)
+  username   String?  // Telegram username
+  firstName  String?  // Telegram user first name
+  messageId  Int?     // Bot message ID for progress updates
+  parts      Int      @default(1)
+  sentParts  Int      @default(0)
+  duration   Int?     // media duration in seconds
+  thumbnail  String?
+  title      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([chatId])
+  @@index([status])
+}
+
+model UserSession {
+  id          String   @id @default(cuid())
+  chatId      String   @unique
+  username    String?
+  firstName   String?
+  lastName    String?
+  totalDownloads Int   @default(0)
+  totalBytes  BigInt   @default(0)
+  lastSeen    DateTime @default(now())
+  createdAt   DateTime @default(now())
+}
+
+model MtprotoSession {
+  id          String   @id @default(cuid())
+  sessionStr  String   // gramjs StringSession
+  phone       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
